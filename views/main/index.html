@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../../public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <script src="/public/js/jquery.js"></script>
+    <script src="/public/js/bootstrap.js"></script>
+    <script src="/public/js/vue.js"></script>
+    <script src="/public/js/index.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>４Ａ旅游景区查询首页</title>
+    <style>
+     body{
+            background-image: url("/public/imgs/indexbk.jpeg");
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        #travalIndexList .row{
+          width: 45%;
+          float: left;
+          margin-left:10px; 
+        }
+        #userComments{
+          width: 100%;
+          height: 300px;
+          overflow: scroll;
+          overflow-x: hidden;
+          border: 1px solid black
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">4A旅游景点首页</a>
+          </div>
+      
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+              
+            </ul>
+            <form class="navbar-form navbar-left">
+              <div class="form-group">
+                <input v-model="seachSight" type="text" class="form-control" placeholder="查询旅游景点">
+              </div>
+              <button type="button" class="btn btn-default" @click="getAllSightListBySeach()">查询</button>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li v-if="login_stadus=='no'"><a href="#" data-toggle="modal" data-target="#myModal">登录/注册</a></li>
+              <li v-if="login_stadus=='ok'" class="dropdown">
+                <div>
+                  <!-- <li ><img :src="userInfo.head_img" alt="" style="width:50px;height:50px;border-radius:25px"></li> -->
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img :src="userInfo.head_img" alt="" style="width:50px;height:50px;border-radius:25px">${userInfo.username} <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#"  data-toggle="modal" data-target="#updateBox">修改个人信息</a></li>
+                    <li v-if="userInfo.isAdmin==true"><a href="/admin">后台管理系统</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#" @click="login_out()">退出登录</a></li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+      </nav>
+
+      <!-- 登录　注册 -->
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">
+                  <!-- Indicates a successful or positive action -->
+                    <button type="button" class="btn btn-success" @click="lo_re_cp = 'login'">登录</button>
+
+                    <!-- Contextual button for informational alert messages -->
+                    <button type="button" class="btn btn-info"  @click="lo_re_cp = 're'">注册</button>
+              </h4>
+            </div>
+            <div v-if="lo_re_cp == 'login'">
+                <div class="modal-body">
+                    <h1>登录</h1>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">用户名</label>
+                        <input  v-model="login_userInfo.username"  type="email" class="form-control" placeholder="用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">密码</label>
+                        <input  v-model="login_userInfo.password"  type="password" class="form-control"  placeholder="密码">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="User_login()">登录</button>
+                </div>
+            </div>
+            <div v-if="lo_re_cp == 're'">
+                <div class="modal-body">
+                    <h1>注册</h1>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">用户名</label>
+                        <input v-model="register_userInfo.username" type="email" class="form-control"  placeholder="用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">密码</label>
+                        <input v-model="register_userInfo.password" type="password" class="form-control"  placeholder="密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">重复密码</label>
+                        <input v-model="register_userInfo.repassword" type="password" class="form-control"  placeholder="重复密码">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="User_resister()">注册</button>
+                </div>
+            </div>
+            <div v-if="lo_re_cp == 'ok'">
+              <div class="modal-body">
+                  登录成功！
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+              </div>
+          </div>
+           
+          </div>
+        </div>
+      </div>
+
+      <!-- 更新个人信息 -->
+  <div class="modal fade" id="updateBox" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabelupdateBox">Modal title</h4>
+          </div>
+          <div class="modal-body">
+              <div class="form-group">
+                  <label for="exampleInputEmail1">用户名</label>
+                  <input v-model="update_userInfo.username" type="email" class="form-control"  placeholder="用户名" readonly>
+              </div>
+              <div class="form-group">
+                  <label for="exampleInputPassword1">密码</label>
+                  <input v-model="update_userInfo.password" type="password" class="form-control"  placeholder="密码">
+              </div>
+              <div class="form-group">
+                  <label for="exampleInputPassword1">性别</label>
+                  <select v-model="update_userInfo.sex" name="" id="">
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label for="exampleInputPassword1">名字</label>
+                  <input v-model="update_userInfo.name" type="text" class="form-control"  placeholder="名字">
+              </div>
+              <div class="form-group">
+                  <label for="exampleInputPassword1">年龄</label>
+                  <input v-model="update_userInfo.age" type="text" class="form-control"  placeholder="年龄">
+              </div>
+              <div class="form-group">
+                  <label for="exampleInputPassword1">头像</label>
+                  <input type="file" id="updateImg">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" @click="upUserInfo()">确认更新个人信息</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- //中部大信息 -->
+    <div class="row" style="width: 80%;margin-left:10%" id="travalIndexList">
+        <div class="row" v-for="(item,index) in travalList">
+            <div class="col-sm-12 col-md-12">
+              <div class="thumbnail">
+                <img :src="item.img" alt="..." style="width: 400px;height:300px">
+                <div class="caption">
+                    <ul class="list-group">
+                      <li class="list-group-item">景点名称：${item.title}</li>
+                      <li class="list-group-item">景点所属城市：${item.city}</li>
+                      <li class="list-group-item">景点简介：${item.desc}</li>
+                      <li class="list-group-item">景点门票价格：${item.price}</li>
+                      <li class="list-group-item">浏览量：${item.views}</li>
+                    </ul>
+                  <p><a href="#" class="btn btn-primary" role="button" data-toggle="modal" data-target="#asightView" @click="getTravalInfoById(item._id,item.views)">详情</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+<!-- 景点详情 -->
+    <div class="modal fade bs-example-modal-lg" id="asightView" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content" style="width: 1200px;margin-left: -300px;">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabelasightView">景点详情</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                  <li><img :src="update_travalInfo.img" alt="..." style="width: 300px;height:200px"></li>
+                    <li class="list-group-item">景点名称：${update_travalInfo.title}</li>
+                    <li class="list-group-item">景点所属城市：${update_travalInfo.city}</li>
+                    <li class="list-group-item">景点简介：${update_travalInfo.desc}</li>
+                    <li class="list-group-item">景点门票价格：${update_travalInfo.price}</li>
+                    <li class="list-group-item">浏览量：${update_travalInfo.views}</li>
+                    <li><input type="text" v-model="addcomInfo"><button class="btn btn-primary" @click="addComment(update_travalInfo._id)">发表评论</button> </li>
+                    <li>
+                      <div id="userComments">
+                          <div class="media" v-for="(c,index) in update_travalInfo.comments">
+                              <div class="media-left">
+                                <a href="#">
+                                  <img class="media-object" :src="c.img" alt="..." style="width:60px;height:60px;border-radius:30px">
+                                </a>
+                              </div>
+                              <div class="media-body">
+                                <h4 class="media-heading">${c.username}</h4>
+                                <p>${c.content}</p>
+                              </div>
+                            </div>
+                    </div></li>
+                  </ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+</body>
+</html>
